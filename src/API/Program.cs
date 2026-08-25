@@ -9,19 +9,19 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Твоя строка подключения с пользователем sa и базой CourseworkPractice
+// РўРІРѕСЏ СЃС‚СЂРѕРєР° РїРѕРґРєР»СЋС‡РµРЅРёСЏ СЃ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј sa Рё Р±Р°Р·РѕР№ CourseworkPractice
 string connString = app.Configuration.GetConnectionString("DefaultConnection")
                     ?? "Server=localhost;Database=CourseworkPractice;User Id=sa;Password=12345;TrustServerCertificate=True;";
 
 // =========================================================================
-// 1. АВТОРИЗАЦИЯ СТУДЕНТА (ВХОД В СИСТЕМУ)
+// 1. РђР’РўРћР РР—РђР¦РРЇ РЎРўРЈР”Р•РќРўРђ (Р’РҐРћР” Р’ РЎРРЎРўР•РњРЈ)
 // =========================================================================
 app.MapPost("/api/auth/login", async (LoginDto dto) =>
 {
     using var conn = new SqlConnection(connString);
     await conn.OpenAsync();
 
-    // 1. Ищем студента по номеру студенческого билета
+    // 1. РС‰РµРј СЃС‚СѓРґРµРЅС‚Р° РїРѕ РЅРѕРјРµСЂСѓ СЃС‚СѓРґРµРЅС‡РµСЃРєРѕРіРѕ Р±РёР»РµС‚Р°
     var checkUserCmd = new SqlCommand(
         "SELECT user_id, is_verified FROM [dbo].[Users] WHERE student_card_number = @sc", conn);
     checkUserCmd.Parameters.AddWithValue("@sc", dto.StudentCard);
@@ -38,16 +38,16 @@ app.MapPost("/api/auth/login", async (LoginDto dto) =>
             userId = userReader.GetInt32(0);
             isVerified = userReader.GetBoolean(1);
         }
-    } // Тут ридер закроется ГАРАНТИРОВАННО и мгновенно
+    } // РўСѓС‚ СЂРёРґРµСЂ Р·Р°РєСЂРѕРµС‚СЃСЏ Р“РђР РђРќРўРР РћР’РђРќРќРћ Рё РјРіРЅРѕРІРµРЅРЅРѕ
 
-    if (!userFound) return Results.BadRequest(new { message = "Студент не найден..." }); // Обязательно закрываем ридер перед следующими запросами
+    if (!userFound) return Results.BadRequest(new { message = "РЎС‚СѓРґРµРЅС‚ РЅРµ РЅР°Р№РґРµРЅ..." }); // РћР±СЏР·Р°С‚РµР»СЊРЅРѕ Р·Р°РєСЂС‹РІР°РµРј СЂРёРґРµСЂ РїРµСЂРµРґ СЃР»РµРґСѓСЋС‰РёРјРё Р·Р°РїСЂРѕСЃР°РјРё
 
     if (!isVerified)
     {
-        return Results.BadRequest(new { message = "Ваша учетная запись еще не одобрена куратором." });
+        return Results.BadRequest(new { message = "Р’Р°С€Р° СѓС‡РµС‚РЅР°СЏ Р·Р°РїРёСЃСЊ РµС‰Рµ РЅРµ РѕРґРѕР±СЂРµРЅР° РєСѓСЂР°С‚РѕСЂРѕРј." });
     }
 
-    // 2. Ищем оборудование по имени машины
+    // 2. РС‰РµРј РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµ РїРѕ РёРјРµРЅРё РјР°С€РёРЅС‹
     var checkEquipCmd = new SqlCommand(
         "SELECT equipment_id FROM [dbo].[Equipment] WHERE machine_name = @mn", conn);
     checkEquipCmd.Parameters.AddWithValue("@mn", dto.MachineName);
@@ -55,16 +55,16 @@ app.MapPost("/api/auth/login", async (LoginDto dto) =>
 
     if (equipId == null)
     {
-        return Results.BadRequest(new { message = "Данный компьютер не зарегистрирован в системе учета." });
+        return Results.BadRequest(new { message = "Р”Р°РЅРЅС‹Р№ РєРѕРјРїСЊСЋС‚РµСЂ РЅРµ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ РІ СЃРёСЃС‚РµРјРµ СѓС‡РµС‚Р°." });
     }
 
-    // 3. Закрываем старые незавершенные сессии этого конкретного компьютера (на случай аварийного отключения)
+    // 3. Р—Р°РєСЂС‹РІР°РµРј СЃС‚Р°СЂС‹Рµ РЅРµР·Р°РІРµСЂС€РµРЅРЅС‹Рµ СЃРµСЃСЃРёРё СЌС‚РѕРіРѕ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ РєРѕРјРїСЊСЋС‚РµСЂР° (РЅР° СЃР»СѓС‡Р°Р№ Р°РІР°СЂРёР№РЅРѕРіРѕ РѕС‚РєР»СЋС‡РµРЅРёСЏ)
     var closeOldCmd = new SqlCommand(
         "UPDATE [dbo].[UsageLog] SET end_date = GETDATE() WHERE equipment_id = @eId AND end_date IS NULL", conn);
     closeOldCmd.Parameters.AddWithValue("@eId", equipId);
     await closeOldCmd.ExecuteNonQueryAsync();
 
-    // 4. Записываем новую сессию в журнал
+    // 4. Р—Р°РїРёСЃС‹РІР°РµРј РЅРѕРІСѓСЋ СЃРµСЃСЃРёСЋ РІ Р¶СѓСЂРЅР°Р»
     var insertLogCmd = new SqlCommand(
         "INSERT INTO [dbo].[UsageLog] (user_id, equipment_id, start_date, auth_method) " +
         "VALUES (@uId, @eId, GETDATE(), 'App'); SELECT SCOPE_IDENTITY();", conn);
@@ -77,7 +77,7 @@ app.MapPost("/api/auth/login", async (LoginDto dto) =>
 });
 
 // =========================================================================
-// 2. ВЫХОД СТУДЕНТА (ЗАВЕРШЕНИЕ СЕССИИ)
+// 2. Р’Р«РҐРћР” РЎРўРЈР”Р•РќРўРђ (Р—РђР’Р•Р РЁР•РќРР• РЎР•РЎРЎРР)
 // =========================================================================
 app.MapPost("/api/auth/logout", async (int logId) =>
 {
@@ -93,14 +93,14 @@ app.MapPost("/api/auth/logout", async (int logId) =>
 });
 
 // =========================================================================
-// 3. ЗАЯВКА НА ДОБАВЛЕНИЕ/РЕГИСТРАЦИЮ СТУДЕНТА
+// 3. Р—РђРЇР’РљРђ РќРђ Р”РћР‘РђР’Р›Р•РќРР•/Р Р•Р“РРЎРўР РђР¦РР® РЎРўРЈР”Р•РќРўРђ
 // =========================================================================
 app.MapPost("/api/auth/register-request", async (SupportTicketDto dto) =>
 {
     using var conn = new SqlConnection(connString);
     await conn.OpenAsync();
 
-    // SQL-запрос теперь учитывает все поля, которые есть в твоей таблице
+    // SQL-Р·Р°РїСЂРѕСЃ С‚РµРїРµСЂСЊ СѓС‡РёС‚С‹РІР°РµС‚ РІСЃРµ РїРѕР»СЏ, РєРѕС‚РѕСЂС‹Рµ РµСЃС‚СЊ РІ С‚РІРѕРµР№ С‚Р°Р±Р»РёС†Рµ
     string sql = @"
         INSERT INTO [dbo].[SupportTickets] 
         (user_id, equipment_id, title, description, student_name_raw, telegram_raw, status, created_at) 
@@ -110,24 +110,24 @@ app.MapPost("/api/auth/register-request", async (SupportTicketDto dto) =>
 
     using var cmd = new SqlCommand(sql, conn);
 
-    // 1. Привязка ID (если данных нет — отправляем SQL NULL)
+    // 1. РџСЂРёРІСЏР·РєР° ID (РµСЃР»Рё РґР°РЅРЅС‹С… РЅРµС‚ вЂ” РѕС‚РїСЂР°РІР»СЏРµРј SQL NULL)
     cmd.Parameters.AddWithValue("@uid", (object?)dto.UserId ?? DBNull.Value);
     cmd.Parameters.AddWithValue("@eid", (object?)dto.EquipmentId ?? DBNull.Value);
 
-    // 2. Текстовые данные
-    cmd.Parameters.AddWithValue("@title", dto.Title ?? "Заявка");
+    // 2. РўРµРєСЃС‚РѕРІС‹Рµ РґР°РЅРЅС‹Рµ
+    cmd.Parameters.AddWithValue("@title", dto.Title ?? "Р—Р°СЏРІРєР°");
     cmd.Parameters.AddWithValue("@desc", dto.Description ?? (object)DBNull.Value);
     cmd.Parameters.AddWithValue("@name", dto.StudentNameRaw ?? (object)DBNull.Value);
     cmd.Parameters.AddWithValue("@tel", dto.TelegramRaw ?? (object)DBNull.Value);
 
-    // 3. Статус всегда по умолчанию 'Новое'
-    cmd.Parameters.AddWithValue("@status", "Новое");
+    // 3. РЎС‚Р°С‚СѓСЃ РІСЃРµРіРґР° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ 'РќРѕРІРѕРµ'
+    cmd.Parameters.AddWithValue("@status", "РќРѕРІРѕРµ");
 
     var ticketId = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
-    return Results.Ok(new { TicketId = ticketId, message = "Заявка успешно отправлена на рассмотрение." });
+    return Results.Ok(new { TicketId = ticketId, message = "Р—Р°СЏРІРєР° СѓСЃРїРµС€РЅРѕ РѕС‚РїСЂР°РІР»РµРЅР° РЅР° СЂР°СЃСЃРјРѕС‚СЂРµРЅРёРµ." });
 });
-// 1. Получить новые сообщения
+// 1. РџРѕР»СѓС‡РёС‚СЊ РЅРѕРІС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ
 app.MapGet("/api/tickets/unread-replies/{userId}", async (int userId) =>
 {
     var replies = new List<object>();
@@ -135,7 +135,7 @@ app.MapGet("/api/tickets/unread-replies/{userId}", async (int userId) =>
     using var conn = new SqlConnection(connString);
     await conn.OpenAsync();
 
-    // Джоиним тикеты пользователя с ответами на них
+    // Р”Р¶РѕРёРЅРёРј С‚РёРєРµС‚С‹ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ РѕС‚РІРµС‚Р°РјРё РЅР° РЅРёС…
     string query = @"
         SELECT r.reply_id, r.ticket_id, r.message_text, t.title 
         FROM [dbo].[TicketReplies] r
@@ -154,14 +154,14 @@ app.MapGet("/api/tickets/unread-replies/{userId}", async (int userId) =>
             ReplyId = reader.GetInt32(0),
             TicketId = reader.GetInt32(1),
             Text = reader.GetString(2),
-            TicketTitle = reader.GetString(3) // Бонусом отдаем название тикета, чтобы в UI было красивее
+            TicketTitle = reader.GetString(3) // Р‘РѕРЅСѓСЃРѕРј РѕС‚РґР°РµРј РЅР°Р·РІР°РЅРёРµ С‚РёРєРµС‚Р°, С‡С‚РѕР±С‹ РІ UI Р±С‹Р»Рѕ РєСЂР°СЃРёРІРµРµ
         });
     }
 
     return Results.Ok(replies);
 });
 
-// 1. Эндпоинт для загрузки актуальных тикетов
+// 1. Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ Р·Р°РіСЂСѓР·РєРё Р°РєС‚СѓР°Р»СЊРЅС‹С… С‚РёРєРµС‚РѕРІ
 app.MapGet("/api/admin/tickets", async () =>
 {
     var tickets = new List<object>();
@@ -171,7 +171,7 @@ app.MapGet("/api/admin/tickets", async () =>
     string query = @"
         SELECT ticket_id, user_id, title, description, student_name_raw, telegram_raw, status, created_at 
         FROM SupportTickets 
-        WHERE status = N'Новое' OR status = N'В работе' 
+        WHERE status = N'РќРѕРІРѕРµ' OR status = N'Р’ СЂР°Р±РѕС‚Рµ' 
         ORDER BY created_at DESC";
 
     using var cmd = new SqlCommand(query, conn);
@@ -195,7 +195,7 @@ app.MapGet("/api/admin/tickets", async () =>
     return Results.Ok(tickets);
 });
 
-// 2. Эндпоинт для отклонения заявки
+// 2. Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ РѕС‚РєР»РѕРЅРµРЅРёСЏ Р·Р°СЏРІРєРё
 app.MapPost("/api/admin/tickets/decline", async (DeclineTicketDto dto) =>
 {
     using var conn = new SqlConnection(connString);
@@ -204,17 +204,17 @@ app.MapPost("/api/admin/tickets/decline", async (DeclineTicketDto dto) =>
 
     try
     {
-        // 1. Меняем статус тикета
-        var cmdStatus = new SqlCommand("UPDATE SupportTickets SET status = N'Отклонено' WHERE ticket_id = @id", conn, transaction);
+        // 1. РњРµРЅСЏРµРј СЃС‚Р°С‚СѓСЃ С‚РёРєРµС‚Р°
+        var cmdStatus = new SqlCommand("UPDATE SupportTickets SET status = N'РћС‚РєР»РѕРЅРµРЅРѕ' WHERE ticket_id = @id", conn, transaction);
         cmdStatus.Parameters.AddWithValue("@id", dto.TicketId);
         await cmdStatus.ExecuteNonQueryAsync();
 
-        // 2. Ставим в очередь сообщение для студента
+        // 2. РЎС‚Р°РІРёРј РІ РѕС‡РµСЂРµРґСЊ СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ СЃС‚СѓРґРµРЅС‚Р°
         var cmdReply = new SqlCommand(@"
             INSERT INTO TicketReplies (ticket_id, message_text, is_sent) 
             VALUES (@id, @msg, 0)", conn, transaction);
         cmdReply.Parameters.AddWithValue("@id", dto.TicketId);
-        cmdReply.Parameters.AddWithValue("@msg", dto.Reason ?? "Ваша заявка была отклонена администратором.");
+        cmdReply.Parameters.AddWithValue("@msg", dto.Reason ?? "Р’Р°С€Р° Р·Р°СЏРІРєР° Р±С‹Р»Р° РѕС‚РєР»РѕРЅРµРЅР° Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРј.");
         await cmdReply.ExecuteNonQueryAsync();
 
         await transaction.CommitAsync();
@@ -223,10 +223,10 @@ app.MapPost("/api/admin/tickets/decline", async (DeclineTicketDto dto) =>
     catch (Exception ex)
     {
         await transaction.RollbackAsync();
-        return Results.Problem($"Ошибка БД: {ex.Message}");
+        return Results.Problem($"РћС€РёР±РєР° Р‘Р”: {ex.Message}");
     }
 });
-// 2. Пометить как прочитанное
+// 2. РџРѕРјРµС‚РёС‚СЊ РєР°Рє РїСЂРѕС‡РёС‚Р°РЅРЅРѕРµ
 app.MapPost("/api/tickets/mark-reply-read/{replyId}", async (int replyId) =>
 {
     using var conn = new SqlConnection(connString);
@@ -243,7 +243,7 @@ app.MapPost("/api/admin/send-reply", async (ReplyRequestDto dto) =>
 {
     if (dto == null || string.IsNullOrWhiteSpace(dto.Message))
     {
-        return Results.BadRequest("Некорректные данные ответа.");
+        return Results.BadRequest("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ РѕС‚РІРµС‚Р°.");
     }
 
     using var conn = new SqlConnection(connString);
@@ -256,9 +256,9 @@ app.MapPost("/api/admin/send-reply", async (ReplyRequestDto dto) =>
         checkCmd.Parameters.AddWithValue("@id", dto.TicketId);
         int exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
 
-        if (exists == 0) return Results.NotFound("Тикет не найден.");
+        if (exists == 0) return Results.NotFound("РўРёРєРµС‚ РЅРµ РЅР°Р№РґРµРЅ.");
 
-        // Пишем в TicketReplies (колонка is_read теперь есть в БД)
+        // РџРёС€РµРј РІ TicketReplies (РєРѕР»РѕРЅРєР° is_read С‚РµРїРµСЂСЊ РµСЃС‚СЊ РІ Р‘Р”)
         var replyCmd = new SqlCommand(@"
             INSERT INTO [dbo].[TicketReplies] (ticket_id, message_text, is_sent, is_read) 
             VALUES (@ticketId, @message, 0, 0)", conn, transaction);
@@ -266,20 +266,20 @@ app.MapPost("/api/admin/send-reply", async (ReplyRequestDto dto) =>
         replyCmd.Parameters.AddWithValue("@message", dto.Message);
         await replyCmd.ExecuteNonQueryAsync();
 
-        // ФИКС ОШИБКИ №2: Меняем 'Отвечено' на разрешенный статус 'В работе'
-        var statusCmd = new SqlCommand("UPDATE [dbo].[SupportTickets] SET status = N'В работе' WHERE ticket_id = @ticketId", conn, transaction);
+        // Р¤РРљРЎ РћРЁРР‘РљР в„–2: РњРµРЅСЏРµРј 'РћС‚РІРµС‡РµРЅРѕ' РЅР° СЂР°Р·СЂРµС€РµРЅРЅС‹Р№ СЃС‚Р°С‚СѓСЃ 'Р’ СЂР°Р±РѕС‚Рµ'
+        var statusCmd = new SqlCommand("UPDATE [dbo].[SupportTickets] SET status = N'Р’ СЂР°Р±РѕС‚Рµ' WHERE ticket_id = @ticketId", conn, transaction);
         statusCmd.Parameters.AddWithValue("@ticketId", dto.TicketId);
         await statusCmd.ExecuteNonQueryAsync();
 
         await transaction.CommitAsync();
-        return Results.Ok(new { Success = true, Message = "Ответ успешно сохранен в TicketReplies" });
+        return Results.Ok(new { Success = true, Message = "РћС‚РІРµС‚ СѓСЃРїРµС€РЅРѕ СЃРѕС…СЂР°РЅРµРЅ РІ TicketReplies" });
     }
     catch (Exception ex)
     {
         await transaction.RollbackAsync();
-        return Results.Problem($"Ошибка при сохранении в БД: {ex.Message}");
+        return Results.Problem($"РћС€РёР±РєР° РїСЂРё СЃРѕС…СЂР°РЅРµРЅРёРё РІ Р‘Р”: {ex.Message}");
     }
-});// GET: Получение данных для ответа
+});// GET: РџРѕР»СѓС‡РµРЅРёРµ РґР°РЅРЅС‹С… РґР»СЏ РѕС‚РІРµС‚Р°
 app.MapGet("/api/admin/student-info/{ticketId}", async (int ticketId) =>
 {
     using var conn = new SqlConnection(connString);
@@ -324,64 +324,64 @@ app.MapGet("/api/admin/student-info/{ticketId}", async (int ticketId) =>
     {
         return Results.Ok(new
         {
-            name = reader["student_name_raw"]?.ToString() ?? "Нет имени",
+            name = reader["student_name_raw"]?.ToString() ?? "РќРµС‚ РёРјРµРЅРё",
 
-            desc = reader["description"]?.ToString() ?? "Нет описания",
+            desc = reader["description"]?.ToString() ?? "РќРµС‚ РѕРїРёСЃР°РЅРёСЏ",
 
             groupName =
                 reader["group_name"] == DBNull.Value
-                ? "Не указана"
+                ? "РќРµ СѓРєР°Р·Р°РЅР°"
                 : reader["group_name"].ToString(),
 
             studentCard =
                 reader["student_card_number"] == DBNull.Value
-                ? "не найден"
+                ? "РЅРµ РЅР°Р№РґРµРЅ"
                 : reader["student_card_number"].ToString()
         });
     }
 
     return Results.NotFound();
 });
-// 1. Эндпоинт для "Подтвердить" (Полная авторегистрация)
+// 1. Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ "РџРѕРґС‚РІРµСЂРґРёС‚СЊ" (РџРѕР»РЅР°СЏ Р°РІС‚РѕСЂРµРіРёСЃС‚СЂР°С†РёСЏ)
 app.MapPost("/api/admin/tickets/confirm", async (ConfirmTicketDto dto) =>
 {
-    using var conn = new SqlConnection(connString); // Убедись, что connString доступен
+    using var conn = new SqlConnection(connString); // РЈР±РµРґРёСЃСЊ, С‡С‚Рѕ connString РґРѕСЃС‚СѓРїРµРЅ
     await conn.OpenAsync();
     using var transaction = conn.BeginTransaction();
 
     try
     {
         // =====================================================================
-        // 1. Читаем данные тикета (Телеграм_raw теперь считаем просто номером студака)
+        // 1. Р§РёС‚Р°РµРј РґР°РЅРЅС‹Рµ С‚РёРєРµС‚Р° (РўРµР»РµРіСЂР°Рј_raw С‚РµРїРµСЂСЊ СЃС‡РёС‚Р°РµРј РїСЂРѕСЃС‚Рѕ РЅРѕРјРµСЂРѕРј СЃС‚СѓРґР°РєР°)
         // =====================================================================
         var getTicketCmd = new SqlCommand("SELECT student_name_raw, telegram_raw FROM SupportTickets WHERE ticket_id = @id", conn, transaction);
         getTicketCmd.Parameters.AddWithValue("@id", dto.TicketId);
 
-        string rawName = "Неизвестно";
+        string rawName = "РќРµРёР·РІРµСЃС‚РЅРѕ";
         string studentCardRaw = null;
 
         using (var reader = await getTicketCmd.ExecuteReaderAsync())
         {
-            if (!await reader.ReadAsync()) return Results.NotFound("Тикет не найден");
+            if (!await reader.ReadAsync()) return Results.NotFound("РўРёРєРµС‚ РЅРµ РЅР°Р№РґРµРЅ");
 
-            rawName = reader["student_name_raw"]?.ToString() ?? "Неизвестно";
-            // Берем то, что студент ввел в поле идентификатора, и считаем это студаком
+            rawName = reader["student_name_raw"]?.ToString() ?? "РќРµРёР·РІРµСЃС‚РЅРѕ";
+            // Р‘РµСЂРµРј С‚Рѕ, С‡С‚Рѕ СЃС‚СѓРґРµРЅС‚ РІРІРµР» РІ РїРѕР»Рµ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР°, Рё СЃС‡РёС‚Р°РµРј СЌС‚Рѕ СЃС‚СѓРґР°РєРѕРј
             studentCardRaw = reader["telegram_raw"]?.ToString()?.Trim();
         }
 
-        // Парсим ФИО
+        // РџР°СЂСЃРёРј Р¤РРћ
         string[] names = rawName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        string lastName = names.Length > 0 ? names[0] : "Неизвестно";
-        string firstName = names.Length > 1 ? names[1] : "Студент";
+        string lastName = names.Length > 0 ? names[0] : "РќРµРёР·РІРµСЃС‚РЅРѕ";
+        string firstName = names.Length > 1 ? names[1] : "РЎС‚СѓРґРµРЅС‚";
         string middleName = names.Length > 2 ? names[2] : null;
 
-        // Берем ID первой группы как дефолт
+        // Р‘РµСЂРµРј ID РїРµСЂРІРѕР№ РіСЂСѓРїРїС‹ РєР°Рє РґРµС„РѕР»С‚
         var groupCmd = new SqlCommand("SELECT TOP 1 group_id FROM Groups", conn, transaction);
         var defaultGroupId = Convert.ToInt32(await groupCmd.ExecuteScalarAsync() ?? 1);
 
 
         // =====================================================================
-        // 2. ПРОВЕРКА НА ДУБЛИКАТЫ (Убиваем ошибку Duplicate Key)
+        // 2. РџР РћР’Р•Р РљРђ РќРђ Р”РЈР‘Р›РРљРђРўР« (РЈР±РёРІР°РµРј РѕС€РёР±РєСѓ Duplicate Key)
         // =====================================================================
         bool userExists = false;
         if (!string.IsNullOrWhiteSpace(studentCardRaw))
@@ -389,17 +389,17 @@ app.MapPost("/api/admin/tickets/confirm", async (ConfirmTicketDto dto) =>
             var checkUserCmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE student_card_number = @sc", conn, transaction);
             checkUserCmd.Parameters.AddWithValue("@sc", studentCardRaw);
             int count = (int)await checkUserCmd.ExecuteScalarAsync();
-            if (count > 0) userExists = true; // Студент с таким билетом уже есть!
+            if (count > 0) userExists = true; // РЎС‚СѓРґРµРЅС‚ СЃ С‚Р°РєРёРј Р±РёР»РµС‚РѕРј СѓР¶Рµ РµСЃС‚СЊ!
         }
 
         // =====================================================================
-        // 3. СОЗДАНИЕ СТУДЕНТА (Только если его еще нет)
+        // 3. РЎРћР—Р”РђРќРР• РЎРўРЈР”Р•РќРўРђ (РўРѕР»СЊРєРѕ РµСЃР»Рё РµРіРѕ РµС‰Рµ РЅРµС‚)
         // =====================================================================
         if (!userExists)
         {
             var insertUserCmd = new SqlCommand(@"
                 INSERT INTO Users (last_name, first_name, middle_name, course, group_id, is_verified, telegram_username, student_card_number) 
-                VALUES (@ln, @fn, @mn, 1, @gid, 1, NULL, @sc)", conn, transaction); // ТЕЛЕГРАМ ЖЕСТКО NULL
+                VALUES (@ln, @fn, @mn, 1, @gid, 1, NULL, @sc)", conn, transaction); // РўР•Р›Р•Р“Р РђРњ Р–Р•РЎРўРљРћ NULL
 
             insertUserCmd.Parameters.AddWithValue("@ln", lastName);
             insertUserCmd.Parameters.AddWithValue("@fn", firstName);
@@ -411,61 +411,61 @@ app.MapPost("/api/admin/tickets/confirm", async (ConfirmTicketDto dto) =>
         }
 
         // =====================================================================
-        // 4. ОБНОВЛЕНИЕ ТИКЕТА (Фикс ошибки CHK_SupportTickets_Status)
+        // 4. РћР‘РќРћР’Р›Р•РќРР• РўРРљР•РўРђ (Р¤РёРєСЃ РѕС€РёР±РєРё CHK_SupportTickets_Status)
         // =====================================================================
-        // Строго используем разрешенный статус 'Закрыто'
-        var updateTicketCmd = new SqlCommand("UPDATE SupportTickets SET status = N'Закрыто' WHERE ticket_id = @id", conn, transaction);
+        // РЎС‚СЂРѕРіРѕ РёСЃРїРѕР»СЊР·СѓРµРј СЂР°Р·СЂРµС€РµРЅРЅС‹Р№ СЃС‚Р°С‚СѓСЃ 'Р—Р°РєСЂС‹С‚Рѕ'
+        var updateTicketCmd = new SqlCommand("UPDATE SupportTickets SET status = N'Р—Р°РєСЂС‹С‚Рѕ' WHERE ticket_id = @id", conn, transaction);
         updateTicketCmd.Parameters.AddWithValue("@id", dto.TicketId);
         await updateTicketCmd.ExecuteNonQueryAsync();
 
         // =====================================================================
-        // 5. ОТПРАВКА ОТВЕТА (С учетом поля is_read)
+        // 5. РћРўРџР РђР’РљРђ РћРўР’Р•РўРђ (РЎ СѓС‡РµС‚РѕРј РїРѕР»СЏ is_read)
         // =====================================================================
         var replyCmd = new SqlCommand(@"INSERT INTO TicketReplies (ticket_id, message_text, is_sent, is_read) VALUES (@id, @msg, 0, 0)", conn, transaction);
         replyCmd.Parameters.AddWithValue("@id", dto.TicketId);
         replyCmd.Parameters.AddWithValue("@msg", userExists
-            ? "Ваша заявка обработана. Вы уже были зарегистрированы в системе."
-            : "Ваша заявка на регистрацию успешно одобрена!");
+            ? "Р’Р°С€Р° Р·Р°СЏРІРєР° РѕР±СЂР°Р±РѕС‚Р°РЅР°. Р’С‹ СѓР¶Рµ Р±С‹Р»Рё Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅС‹ РІ СЃРёСЃС‚РµРјРµ."
+            : "Р’Р°С€Р° Р·Р°СЏРІРєР° РЅР° СЂРµРіРёСЃС‚СЂР°С†РёСЋ СѓСЃРїРµС€РЅРѕ РѕРґРѕР±СЂРµРЅР°!");
 
         await replyCmd.ExecuteNonQueryAsync();
 
-        // Фиксируем все изменения разом
+        // Р¤РёРєСЃРёСЂСѓРµРј РІСЃРµ РёР·РјРµРЅРµРЅРёСЏ СЂР°Р·РѕРј
         await transaction.CommitAsync();
-        return Results.Ok(new { message = "Успешно" });
+        return Results.Ok(new { message = "РЈСЃРїРµС€РЅРѕ" });
     }
     catch (Exception ex)
     {
         await transaction.RollbackAsync();
-        // Выводим текст ошибки в консоль/лог API, чтобы если что — сразу увидеть причину
-        Console.WriteLine($"[ERROR] Ошибка авторегистрации: {ex.Message}");
-        return Results.Problem($"Ошибка авторегистрации: {ex.Message}");
+        // Р’С‹РІРѕРґРёРј С‚РµРєСЃС‚ РѕС€РёР±РєРё РІ РєРѕРЅСЃРѕР»СЊ/Р»РѕРі API, С‡С‚РѕР±С‹ РµСЃР»Рё С‡С‚Рѕ вЂ” СЃСЂР°Р·Сѓ СѓРІРёРґРµС‚СЊ РїСЂРёС‡РёРЅСѓ
+        Console.WriteLine($"[ERROR] РћС€РёР±РєР° Р°РІС‚РѕСЂРµРіРёСЃС‚СЂР°С†РёРё: {ex.Message}");
+        return Results.Problem($"РћС€РёР±РєР° Р°РІС‚РѕСЂРµРіРёСЃС‚СЂР°С†РёРё: {ex.Message}");
     }
 });
-// 2. Эндпоинт для "В работе" (Просто смена статуса)
+// 2. Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ "Р’ СЂР°Р±РѕС‚Рµ" (РџСЂРѕСЃС‚Рѕ СЃРјРµРЅР° СЃС‚Р°С‚СѓСЃР°)
 app.MapPost("/api/admin/tickets/in-progress", async (InProgressTicketDto dto) =>
 {
     using var conn = new SqlConnection(connString);
     await conn.OpenAsync();
-    var cmd = new SqlCommand("UPDATE SupportTickets SET status = N'В работе' WHERE ticket_id = @id", conn);
+    var cmd = new SqlCommand("UPDATE SupportTickets SET status = N'Р’ СЂР°Р±РѕС‚Рµ' WHERE ticket_id = @id", conn);
     cmd.Parameters.AddWithValue("@id", dto.TicketId);
     await cmd.ExecuteNonQueryAsync();
 
     return Results.Ok();
 });
 
-// НОВЫЙ ЭНДПОИНТ ДЛЯ ТАЙМЕРА НЕЗАРИГЕСТРИРОВАННОГО СТУДЕНТА
+// РќРћР’Р«Р™ Р­РќР”РџРћРРќРў Р”Р›РЇ РўРђР™РњР•Р Рђ РќР•Р—РђР РР“Р•РЎРўР РР РћР’РђРќРќРћР“Рћ РЎРўРЈР”Р•РќРўРђ
 app.MapGet("/api/tickets/check-status/{ticketId}", async (int ticketId) =>
 {
     using var conn = new SqlConnection(connString);
     await conn.OpenAsync();
 
-    // Одним запросом забираем статус тикета и последний ответ на него (если он есть)
+    // РћРґРЅРёРј Р·Р°РїСЂРѕСЃРѕРј Р·Р°Р±РёСЂР°РµРј СЃС‚Р°С‚СѓСЃ С‚РёРєРµС‚Р° Рё РїРѕСЃР»РµРґРЅРёР№ РѕС‚РІРµС‚ РЅР° РЅРµРіРѕ (РµСЃР»Рё РѕРЅ РµСЃС‚СЊ)
     string query = @"
         SELECT TOP 1 t.status, r.message_text 
         FROM [dbo].[SupportTickets] t
         LEFT JOIN [dbo].[TicketReplies] r ON t.ticket_id = r.ticket_id
         WHERE t.ticket_id = @id
-        ORDER BY r.reply_id DESC"; // Предполагается, что в TicketReplies есть инкрементный ID или дата
+        ORDER BY r.reply_id DESC"; // РџСЂРµРґРїРѕР»Р°РіР°РµС‚СЃСЏ, С‡С‚Рѕ РІ TicketReplies РµСЃС‚СЊ РёРЅРєСЂРµРјРµРЅС‚РЅС‹Р№ ID РёР»Рё РґР°С‚Р°
 
     using var cmd = new SqlCommand(query, conn);
     cmd.Parameters.AddWithValue("@id", ticketId);
@@ -480,19 +480,19 @@ app.MapGet("/api/tickets/check-status/{ticketId}", async (int ticketId) =>
         });
     }
 
-    return Results.NotFound(new { message = "Заявка не найдена." });
+    return Results.NotFound(new { message = "Р—Р°СЏРІРєР° РЅРµ РЅР°Р№РґРµРЅР°." });
 });
-// Нужный DTO для приема данных
+// РќСѓР¶РЅС‹Р№ DTO РґР»СЏ РїСЂРёРµРјР° РґР°РЅРЅС‹С…
 app.Run();
 
-// DTO модели для обмена данными
+// DTO РјРѕРґРµР»Рё РґР»СЏ РѕР±РјРµРЅР° РґР°РЅРЅС‹РјРё
 public class ReplyRequestDto { public int TicketId { get; set; } public string Message { get; set; } }
 public record LoginDto(string StudentCard, string MachineName);
 public record RegisterDto(string LastName, string FirstName, string MiddleName, string StudentCard, string GroupName);
 public record MessageDto(int MessageId, string Text);
 public record SupportTicketDto(int? UserId, int? EquipmentId, string Title, string Description, string StudentNameRaw, string? TelegramRaw);
 public record DeclineTicketDto(int TicketId, string Reason);
-// DTO-шки для запросов
+// DTO-С€РєРё РґР»СЏ Р·Р°РїСЂРѕСЃРѕРІ
 public record ConfirmTicketDto(int TicketId);
 public record InProgressTicketDto(int TicketId);
 
