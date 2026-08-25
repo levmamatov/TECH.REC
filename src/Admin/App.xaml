@@ -1,0 +1,52 @@
+﻿<Application x:Class="Technic_accounting.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Technic_accounting"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+
+        <Style TargetType="TextBox">
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+
+                        <Grid>
+
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}">
+                                <ScrollViewer x:Name="PART_ContentHost"/>
+                            </Border>
+
+                            <TextBlock x:Name="Placeholder"
+                                   Text="{TemplateBinding Tag}"
+                                   Foreground="Gray"
+                                   Opacity="0.6"
+                                   Margin="8,0,0,0"
+                                   VerticalAlignment="Center"
+                                   IsHitTestVisible="False"
+                                   Visibility="Collapsed"/>
+
+                        </Grid>
+
+                        <ControlTemplate.Triggers>
+
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Placeholder"
+                                    Property="Visibility"
+                                    Value="Visible"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
+
+        <Style x:Key="DashboardCard" TargetType="Border">
+        </Style>
+    </Application.Resources>
+</Application>

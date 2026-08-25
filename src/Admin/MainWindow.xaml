@@ -1,0 +1,307 @@
+﻿<Window x:Class="Technic_accounting.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Technic_accounting"
+        mc:Ignorable="d"
+        Title="Учет техники v1.0" Height="700" Width="1200"
+        Background="#F5F6F7" WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <TabControl TabStripPlacement="Left" BorderThickness="0" Background="White" Margin="0,0,10,0" x:Name="MainTabControl">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Height" Value="50"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border Name="Border" Background="Transparent" CornerRadius="5" Margin="5">
+                                    <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Left" ContentSource="Header" Margin="10,2"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Border" Property="Background" Value="#4E73DF"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="IsMouseOver" Value="True"/>
+                                            <Condition Property="IsSelected" Value="False"/>
+                                        </MultiTrigger.Conditions>
+                                        <Setter TargetName="Border" Property="Background" Value="#E9ECEF"/>
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+                <Style x:Key="DashboardCard" TargetType="Border">
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="CornerRadius" Value="6"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="BorderBrush" Value="#E3E6F0"/>
+                </Style>
+            </TabControl.Resources>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🏠" FontSize="20" Margin="0,0,10,0"/>
+                        <TextBlock Text="Главная" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </TabItem.Header>
+
+                <Grid Margin="25">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,20">
+                        <TextBlock Text="Панель управления" FontSize="26" FontWeight="Light" Foreground="#333" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,20">
+                        <Border Style="{StaticResource DashboardCard}" Margin="0,0,10,0" Padding="15">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="ВСЕГО НОУТБУКОВ" FontSize="16" FontWeight="Bold" Foreground="#A0AEC0" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtMainTotalLaptops" Text="0" FontSize="24" FontWeight="Bold" Foreground="#2D3748" Margin="0,10,0,0" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Text="💻" FontSize="24" HorizontalAlignment="Right" VerticalAlignment="Center" Opacity="0.5"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource DashboardCard}" Margin="5,0,5,0" Padding="15">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="АКТИВНЫЕ СТУДЕНТЫ" FontSize="16" FontWeight="Bold" Foreground="#A0AEC0" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtMainActiveStudents" Text="0" FontSize="24" FontWeight="Bold" Foreground="#4E73DF" Margin="0,10,0,0" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Text="🎓" FontSize="24" HorizontalAlignment="Right" VerticalAlignment="Center" Opacity="0.5"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource DashboardCard}" Margin="5,0,5,0" Padding="15">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="ОТКРЫТЫЕ ЗАЯВКИ" FontSize="16" FontWeight="Bold" Foreground="#A0AEC0" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtMainOpenRequests" Text="0" FontSize="24" FontWeight="Bold" Foreground="#F6AD55" Margin="0,10,0,0" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Text="🔔" FontSize="24" HorizontalAlignment="Right" VerticalAlignment="Center" Opacity="0.5"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource DashboardCard}" Margin="10,0,0,0" Padding="15">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="ОШИБКИ АВТОРИЗАЦИИ" FontSize="16" FontWeight="Bold" Foreground="#A0AEC0" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtMainAuthErrors" Text="0" FontSize="24" FontWeight="Bold" Foreground="#E53E3E" Margin="0,10,0,0" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Text="⚠️" FontSize="24" HorizontalAlignment="Right" VerticalAlignment="Center" Opacity="0.5"/>
+                            </Grid>
+                        </Border>
+                    </UniformGrid>
+
+                    <UniformGrid Grid.Row="2" Columns="3" Margin="0,0,0,20">
+                        <Border Style="{StaticResource DashboardCard}" Margin="0,0,6,0">
+                            <Grid>
+                                <Border Background="#2ECC71" Width="4" HorizontalAlignment="Left"/>
+                                <StackPanel Margin="15,10">
+                                    <TextBlock Text="В наличии" FontSize="16" Foreground="#718096" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtStatAvailable" Text="0" FontSize="18" FontWeight="Bold" Foreground="Black" Margin="0,5" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource DashboardCard}" Margin="3,0,3,0">
+                            <Grid>
+                                <Border Background="#4E73DF" Width="4" HorizontalAlignment="Left"/>
+                                <StackPanel Margin="15,10">
+                                    <TextBlock Text="В сессии" FontSize="16" Foreground="#718096" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtStatInSession" Text="0" FontSize="18" FontWeight="Bold" Foreground="Black" Margin="0,5" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource DashboardCard}" Margin="3,0,3,0">
+                            <Grid>
+                                <Border Background="#E53E3E" Width="4" HorizontalAlignment="Left"/>
+                                <StackPanel Margin="15,10">
+                                    <TextBlock Text="Проблема" FontSize="16" Foreground="#718096" HorizontalAlignment="Center"/>
+                                    <TextBlock x:Name="TxtStatIssue" Text="0" FontSize="18" FontWeight="Bold" Foreground="Black" Margin="0,5" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </UniformGrid>
+
+                    <Grid Grid.Row="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Style="{StaticResource DashboardCard}" Margin="0,0,15,0" Padding="15">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="⚡ Активные сессии" FontSize="15" FontWeight="Bold" Foreground="#333" Margin="0,0,0,10"/>
+
+                                <DataGrid x:Name="DgMainActiveSessions" Grid.Row="1" AutoGenerateColumns="False" 
+                                          Background="Transparent" BorderThickness="0" RowHeaderWidth="0" IsReadOnly="True">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Студент" Binding="{Binding Student}" Width="1.3*"/>
+                                        <DataGridTextColumn Header="Группа" Binding="{Binding Group}" Width="0.8*"/>
+                                        <DataGridTextColumn Header="Ноутбук" Binding="{Binding Laptop}" Width="1.6*"/>
+                                        <DataGridTextColumn Header="Кабинет" Binding="{Binding Room}" Width="0.6*"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="1" Style="{StaticResource DashboardCard}" Padding="15">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="🔔 Последние уведомления" FontSize="15" FontWeight="Bold" Foreground="#333" Margin="0,0,0,10"/>
+
+                                <ListBox x:Name="LbMainNotifications" Grid.Row="1" Background="Transparent" BorderThickness="0" SelectionChanged="LbMainNotifications_SelectionChanged">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,4,0,4">
+                                                <TextBlock Text="{Binding ContentText}" FontSize="13" Foreground="#2D3748" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Timestamp}" FontSize="10" Foreground="#A0AEC0" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚙️" FontSize="20" Margin="0,0,10,0"/>
+                        <TextBlock Text="База данных" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </TabItem.Header>
+
+                <TabControl Margin="10" Background="Transparent" BorderThickness="0,1,0,0" Name="DbTabControl">
+                    <TabItem Header="Студенты">
+                        <Grid Background="White">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="55"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0">
+                                <TextBlock Text="🎓 Группа:" Width="90" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,5,0"/>
+                                <ComboBox x:Name="cbUserFilterGroup" Width="150" Height="25" SelectionChanged="cbUserFilterGroup_SelectionChanged" DisplayMemberPath="group_name"/>
+                            </StackPanel>
+
+                            <DataGrid Name="dgUsers" AutoGenerateColumns="False" CanUserDeleteRows="True" Margin="10" Grid.Row="1">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Фамилия" Binding="{Binding last_name}" Width="*"/>
+                                    <DataGridTextColumn Header="Имя" Binding="{Binding first_name}" Width="*"/>
+                                    <DataGridTextColumn Header="Группа" Binding="{Binding group_name}" IsReadOnly="True" Width="80"/>
+                                    <DataGridTextColumn Header="Студ. билет" Binding="{Binding student_card_number}" Width="140"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10" Background="#F8F9FA" HorizontalAlignment="Center">
+                                <Button x:Name="btnSwitchMode" Content="➕ Режим: Добавить студента" 
+                                            Click="SwitchMode_Click" Background="#6C757D" Foreground="White" 
+                                            Margin="5"/>
+
+                                <StackPanel x:Name="pnlStudentControls" Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBox Name="txtUserLN" Width="150" Margin="5" Tag="Фамилия"/>
+                                    <TextBox Name="txtUserFN" Width="120" Margin="5" Tag="Имя"/>
+                                    <TextBox Name="txtStudentCard" Width="80" Margin="5,5,25,5" Tag="Студ.билет"/>
+                                    <Button Content="Добавить студента" Click="AddUser_Click" Width="130" Background="#28A745" Foreground="White" Margin="5"/>
+                                    <Button Content="Удалить" Click="DeleteUser_Click" Width="100" Background="#DC3545" Foreground="White" Margin="5"/>
+                                </StackPanel>
+
+                                <StackPanel x:Name="pnlGroupControls" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="Collapsed">
+                                    <TextBox Name="txtNewGroupName" Width="200" Margin="5" Tag="Название группы"/>
+                                    <ComboBox Name="cbCuratorSelector" Width="200" Margin="5" DisplayMemberPath="full_name" Tag="Выберите куратора"/>
+                                    <Button Content="Создать группу" Click="SaveGroup_Click" Width="130" Background="#4E73DF" Foreground="White" Margin="5"/>
+                                    <Button Content="Удалить" Click="DeleteGroup_Click" Width="100" Background="#DC3545" Foreground="White" Margin="5"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="Техника">
+                        <Grid Background="White">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="55"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0">
+                                <TextBlock Text="🏫 Кабинет:" Foreground="Black" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,0,25,0"/>
+                                <ComboBox x:Name="cbRoomFilter" Width="150" Height="25" HorizontalAlignment="Right" SelectionChanged="cbRoomFilter_SelectionChanged" DisplayMemberPath="room"/>
+                            </StackPanel>
+
+                            <DataGrid Name="dgEquipment" AutoGenerateColumns="False" Margin="10" Grid.Row="1">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Кабинет" Binding="{Binding room}" Width="100"/>
+                                    <DataGridTextColumn Header="Тип" Binding="{Binding type_name}" Width="*"/>
+                                    <DataGridTextColumn Header="Модель" Binding="{Binding model}" Width="*"/>
+                                    <DataGridTextColumn Header="Инв. №" Binding="{Binding inventory_number}" Width="100"/>
+                                    <DataGridTextColumn Header="Имя ПК" Binding="{Binding machine_name}" Width="180"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="10,10,0,10" Background="#F8F9FA">
+                                <ComboBox Name="cbEquipType" Width="120" DisplayMemberPath="name" VerticalContentAlignment="Center" Margin="5"/>
+                                <TextBox Name="txtEquipModel" Width="150" Margin="5" Tag="Модель" VerticalContentAlignment="Center"/>
+                                <TextBox Name="txtEquipInv" Width="120" Margin="5" Tag="Инвентарный №" VerticalContentAlignment="Center"/>
+                                <TextBox Name="txtMachineName" Width="180" Margin="5" Tag="Имя устройство" VerticalContentAlignment="Center"/>
+                                <Button Content="Добавить" Click="AddEquip_Click" Width="100" Background="#28A745" Foreground="White" Margin="10,5"/>
+                                <Button Content="Удалить" Click="DeleteEquip_Click" Width="100" Background="#DC3545" Foreground="White" Margin="5"/>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📋" FontSize="20" Margin="0,0,10,0"/>
+                        <TextBlock Text="Журнал" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </TabItem.Header>
+
+                <local:JournalControl/>
+                
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🔔" FontSize="20" Margin="0,0,10,0"/>
+                        <TextBlock Text="Уведомления" VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <local:NotificationsControl x:Name="MyNotificationsControl" 
+                            CreateStudentRequested="MyNotificationsControl_CreateStudentRequested" />
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>
